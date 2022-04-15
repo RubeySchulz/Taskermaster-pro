@@ -13,6 +13,7 @@ var createTask = function(taskText, taskDate, taskList) {
   // append span and p element to parent li
   taskLi.append(taskSpan, taskP);
 
+  auditTask(taskLi);
 
   // append to ul list on the page
   $("#list-" + taskList).append(taskLi);
@@ -61,6 +62,24 @@ $(".list-group").on("click", "p", function() {
   console.log(text);
 })
 
+var auditTask = function(taskEl){
+  //get date from task element
+  var date = $(taskEl).find("span").text().trim();
+
+  //convert to moment object at 5:00pm
+  var time = moment(date, "L").set("hour", 17);
+
+  // remove any old classes from element
+  $(taskEl).removeClass("list-group-item-warning list-group-item-danger");
+
+  //apply new class
+  if (moment().isAfter(time)){
+    $(taskEl).addClass("list-group-item-danger");
+  }
+  else if (Math.abs(moment().diff(time, "days")) <= 2){
+    $(taskEl).addClass("list-group-item-warning");
+  }
+}
 
 $(".list-group").on("blur", "textarea", function() {
   // get the textarea's current value
@@ -145,8 +164,9 @@ $(".list-group").on("change", "input[type='text']", function() {
     .addClass("badge badge-primary badge-pill")
     .text(date);
 
-  //replace input with span element
+  //replace input with span element, and run audit for time.
   $(this).replaceWith(taskSpan);
+  auditTask($(taskSpan).closest(".list-group-item"));
 })
 
 //makes lists sortable
